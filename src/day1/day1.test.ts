@@ -1,4 +1,4 @@
-import { maxCalories, topN } from './day1';
+import { topN } from './day1';
 
 describe('aoc day 1', () => {
   it('should return hello world', () => {
