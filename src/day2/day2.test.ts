@@ -6,5 +6,5 @@ describe('day 2 aoc', () => {
 
   it('should calculate score using elfish strategy', () => {
     expect(calculateStrategicScore()).toEqual(13193);
-  })
+  });
 });

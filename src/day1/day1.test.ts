@@ -7,5 +7,5 @@ describe('aoc day 1', () => {
 
   it('should return top three scores', () => {
     expect(topN()).toEqual(195625);
-  })
+  });
 });

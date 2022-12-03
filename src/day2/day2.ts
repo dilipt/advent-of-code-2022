@@ -14,59 +14,55 @@ const scores: Record<Hand, number> = {
   Z: 3, // Scissors
 } as const;
 
-const trumps: Record<Hand, Hand> = {
-  A: 'Z',
-  B: 'X',
-  C: 'Y',
-  X: 'C',
-  Y: 'A',
-  Z: 'B',
-} as const;
+export function calculateScore(): number {
+  const trumps: Record<Hand, Hand> = {
+    A: 'Z',
+    B: 'X',
+    C: 'Y',
+    X: 'C',
+    Y: 'A',
+    Z: 'B',
+  } as const;
 
-export function calculateScore() {
-  const turns = fs.readFileSync(path.join(__dirname, 'input.txt')).toString().split('\n');
-  let myScore = 0;
-
-  for (const turn of turns) {
-    const [opponentPlay, myPlay] = <[OpponentHand, MyHand]>turn.split(' ');
-    if (trumps[opponentPlay] === myPlay) {
-      myScore += scores[myPlay];
-    } else if (trumps[myPlay] === opponentPlay) {
-      myScore += (6 + scores[myPlay]);
-    } else {
-      myScore += (3 + scores[myPlay]);
-    }
-  }
-
-  return myScore;
+  return fs.readFileSync(path.join(__dirname, 'input.txt'))
+    .toString()
+    .split('\n')
+    .reduce((score: number, turn) => {
+      const [opponentPlay, myPlay] = turn.split(' ') as [OpponentHand, MyHand];
+      if (trumps[opponentPlay] === myPlay) {
+        return score + scores[myPlay];
+      } else if (trumps[myPlay] === opponentPlay) {
+        return score + (6 + scores[myPlay]);
+      } else {
+        return score + (3 + scores[myPlay]);
+      }
+    }, 0);
 }
 
-const toLose: Record<OpponentHand, OpponentHand> = {
-  A: 'C',
-  B: 'A',
-  C: 'B',
-}
+export function calculateStrategicScore(): number {
+  const toLose: Record<OpponentHand, OpponentHand> = {
+    A: 'C',
+    B: 'A',
+    C: 'B',
+  } as const;
 
-const toWin: Record<OpponentHand, OpponentHand> = {
-  A: 'B',
-  B: 'C',
-  C: 'A',
-}
+  const toWin: Record<OpponentHand, OpponentHand> = {
+    A: 'B',
+    B: 'C',
+    C: 'A',
+  } as const;
 
-export function calculateStrategicScore() {
-  const turns = fs.readFileSync(path.join(__dirname, 'input.txt')).toString().split('\n');
-  let myScore = 0;
-
-  for (const turn of turns) {
-    const [opponentPlay, myPlay] = <[OpponentHand, MyHand]>turn.split(' ');
-    if (myPlay === 'X') { // need to lose
-      myScore += scores[toLose[opponentPlay]];
-    } else if (myPlay === 'Y') { // need to draw
-      myScore += (3 + scores[opponentPlay]);
-    } else { // Z, need to win
-      myScore += (6 + scores[toWin[opponentPlay]]);
-    }
-  }
-
-  return myScore;
+  return fs.readFileSync(path.join(__dirname, 'input.txt'))
+    .toString()
+    .split('\n')
+    .reduce((score: number, turn) => {
+      const [opponentPlay, myPlay] = turn.split(' ') as [OpponentHand, MyHand];
+      if (myPlay === 'X') { // need to lose
+        return score + scores[toLose[opponentPlay]];
+      } else if (myPlay === 'Y') { // need to draw
+        return score + (3 + scores[opponentPlay]);
+      } else { // Z, need to win
+        return score + (6 + scores[toWin[opponentPlay]]);
+      }
+    }, 0);
 }
