@@ -35,9 +35,9 @@ function createFileStructure(input: string[]): Directory {
   const top = new Directory('/', null);
   let currentDir: Directory = top;
   for (let i = 1; i < input.length; i++) {
-    const line = input[i];
-    if (line.startsWith('$ cd')) {
-      const cdDirName = line.split(' ')[2];
+    const currentLine = input[i];
+    if (currentLine.startsWith('$ cd')) {
+      const cdDirName = currentLine.split(' ')[2];
       if (cdDirName === '..') {
         if (currentDir.parent === null) throw Error(`directory ${currentDir.name} has no parent`);
         currentDir = currentDir.parent;
@@ -47,10 +47,10 @@ function createFileStructure(input: string[]): Directory {
         currentDir = cdResult;
       }
     } else {
-      if (/^dir.*/.test(input[i])) {
-        currentDir.subdirs.push(new Directory(input[i].split(' ')[1], currentDir));
-      } else if (/^\d+/.test(input[i])) {
-        currentDir.files.push(new File(input[i].split(' ')[1], parseInt(input[i].split(' ')[0], 10)));
+      if (/^dir.*/.test(currentLine)) {
+        currentDir.subdirs.push(new Directory(currentLine.split(' ')[1], currentDir));
+      } else if (/^\d+/.test(currentLine)) {
+        currentDir.files.push(new File(currentLine.split(' ')[1], parseInt(currentLine.split(' ')[0], 10)));
       }
     }
   }
