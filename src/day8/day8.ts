@@ -6,21 +6,21 @@ export function part1(): number {
 
   const forestWidth = input[0].length;
   const forestHeight = input.length;
-  const forest = input.map(treeline => treeline.split(''));
+  const forest = input.map(treeline => treeline.split('').map(tree => parseInt(tree, 10)));
 
-  const treeRowFor = (i: number, j: number): number[] => forest[i].map(tree => parseInt(tree, 10));
-  const treeColFor = (i: number, j: number): number[] => forest.flatMap(row => parseInt(row[j], 10));
+  const treeRowFor = (row: number): number[] => forest[row];
+  const treeColFor = (col: number): number[] => forest.flatMap(row => row[col]);
 
   let visibleTrees = (forestWidth * 2) + ((forestHeight - 2) * 2); // outer edges
   for (let row = 1; row < input[0].length - 1; row++) {
     for (let col = 1; col < input.length - 1; col++) {
-      const tree = parseInt(forest[row][col], 10);
-      const treeRow = treeRowFor(row, col);
-      const treeCol = treeColFor(row, col);
-      const smallerTreesEast = treeRow.filter((currTree, idx) => (idx > col) && (currTree >= tree)).length === 0;
-      const smallerTreesWest = treeRow.filter((currTree, idx) => (idx < col) && (currTree >= tree)).length === 0;
-      const smallerTreesNorth = treeCol.filter((currTree, idx) => (idx < row) && (currTree >= tree)).length === 0;
-      const smallerTreesSouth = treeCol.filter((currTree, idx) => (idx > row) && (currTree >= tree)).length === 0;
+      const currentTree = forest[row][col];
+      const treeRow = treeRowFor(row);
+      const treeCol = treeColFor(col);
+      const smallerTreesEast = treeRow.slice(col + 1, treeRow.length).every(tree => tree < currentTree);
+      const smallerTreesWest = treeRow.slice(0, col).every(tree => tree < currentTree);
+      const smallerTreesNorth = treeCol.slice(0, row).every(tree => tree < currentTree);
+      const smallerTreesSouth = treeCol.slice(row + 1, treeCol.length).every(tree => tree < currentTree);
 
       if (smallerTreesEast || smallerTreesWest || smallerTreesNorth || smallerTreesSouth) {
         visibleTrees++;
@@ -32,17 +32,15 @@ export function part1(): number {
 
 export function part2(): number {
   const input = fs.readFileSync(path.join(__dirname, 'input.txt')).toString().split('\n');
-  const forest = input.map(treeline => treeline.split(''));
+  const forest = input.map(treeline => treeline.split('').map(tree => parseInt(tree, 10)));
 
-  const treeRowFor = (row: number): number[] => forest[row].map(tree => parseInt(tree, 10));
-  const treeColFor = (col: number): number[] => forest.flatMap(row => parseInt(row[col], 10));
+  const treeRowFor = (row: number): number[] => forest[row];
+  const treeColFor = (col: number): number[] => forest.flatMap(row => row[col]);
   const scenicScoreFor = (tree: number, treeLine: number[]): number => {
     let score = 0;
     for (let i = 0; i < treeLine.length; i++) {
-      if (treeLine[i] < tree) {
-        score++;
-      } else {
-        score++;
+      score++;
+      if (treeLine[i] >= tree) {
         break;
       }
     }
@@ -53,14 +51,14 @@ export function part2(): number {
 
   for (let row = 1; row < input[0].length - 1; row++) {
     for (let col = 1; col < input.length - 1; col++) {
-      const tree = parseInt(forest[row][col], 10);
+      const tree = forest[row][col];
       const treeRow = treeRowFor(row);
       const treeCol = treeColFor(col);
 
-      const eastScenicScore = scenicScoreFor(tree, treeRow.filter((_, idx) => (idx > col)));
-      const westScenicScore = scenicScoreFor(tree, treeRow.filter((_, idx) => (idx < col)).reverse());
-      const northScenicScore = scenicScoreFor(tree, treeCol.filter((_, idx) => (idx < row)).reverse());
-      const southScenicScore = scenicScoreFor(tree, treeCol.filter((_, idx) => (idx > row)));
+      const eastScenicScore = scenicScoreFor(tree, treeRow.slice(col + 1, treeRow.length));
+      const westScenicScore = scenicScoreFor(tree, treeRow.slice(0, col).reverse());
+      const northScenicScore = scenicScoreFor(tree, treeCol.slice(0, row).reverse());
+      const southScenicScore = scenicScoreFor(tree, treeCol.slice(row + 1, treeCol.length));
 
       const scenicScore = eastScenicScore * westScenicScore * northScenicScore * southScenicScore;
 
