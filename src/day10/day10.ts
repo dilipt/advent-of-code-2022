@@ -56,9 +56,12 @@ export function part2(inputs: string[]): string[][] {
   const cpu = new ElfCPU(inputs);
   const crt = [] as string[][];
 
+  for (let i = 0; i < 6; i++) {
+    crt[i] = new Array<string>(40);
+  }
+
   let currentPixel = 0;
   let currentLine = 0;
-  crt[0] = new Array<string>(40);
   while (cpu.clockCycle <= 240) {
     if ([cpu.X - 1, cpu.X, cpu.X + 1].includes(currentPixel)) {
       crt[currentLine][currentPixel] = '#';
@@ -66,9 +69,8 @@ export function part2(inputs: string[]): string[][] {
       crt[currentLine][currentPixel] = '.';
     }
 
-    if (currentPixel === 39) {
+    if (currentPixel === crt[currentLine].length - 1) {
       currentLine++;
-      crt[currentLine] = new Array<string>(40);
     }
     currentPixel = (currentPixel + 1) % 40;
     cpu.tick();
