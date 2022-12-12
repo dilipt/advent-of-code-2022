@@ -1,22 +1,14 @@
-type Instruction = 'addx' | 'noop';
-
 class ElfCPU {
   X: number;
   clockCycle: number;
-
-  currentInstruction: Instruction | null;
-  currentValue: number | null;
   isCurrentlyAdding: boolean;
   instructionPointer: number;
-
   instructionSet: string[];
 
   constructor(instructions: string[]) {
     this.X = 1;
     this.clockCycle = 1;
     this.isCurrentlyAdding = false;
-    this.currentInstruction = null;
-    this.currentValue = null;
     this.instructionSet = instructions;
     this.instructionPointer = 0;
   }
@@ -26,40 +18,19 @@ class ElfCPU {
   }
 
   tick(): void {
-    if (this.currentInstruction === null && this.instructionPointer < this.instructionSet.length) {
-      const nextInstruction = this.instructionSet[this.instructionPointer];
-      if (nextInstruction.startsWith('noop')) {
-        this.currentInstruction = 'noop';
-      } else if (nextInstruction.startsWith('addx')) {
-        this.currentInstruction = 'addx';
-        this.currentValue = parseInt(nextInstruction.split(' ')[1], 10);
-      } else {
-        throw new Error(`unknown instruction: ${nextInstruction}`);
-      }
-    }
-
-    switch (this.currentInstruction) {
-      case 'noop': {
-        this.currentInstruction = null;
+    if (this.instructionPointer < this.instructionSet.length) {
+      const current = this.instructionSet[this.instructionPointer];
+      if (current.startsWith('noop')) {
         this.instructionPointer++;
-        break;
-      }
-      case 'addx': {
+      } else if (current.startsWith('addx')) {
         if (this.isCurrentlyAdding) {
-          if (this.currentValue === null) throw Error('addx: currentValue cannot be null');
-          this.X += this.currentValue;
-          this.currentInstruction = null;
-          this.currentValue = null;
+          const value = parseInt(this.instructionSet[this.instructionPointer].split(' ')[1]);
+          this.X += value;
           this.isCurrentlyAdding = false;
           this.instructionPointer++;
         } else {
           this.isCurrentlyAdding = true;
         }
-        break;
-      }
-      default: {
-        this.instructionPointer++;
-        break;
       }
     }
     this.clockCycle++;
@@ -79,4 +50,29 @@ export function part1(inputs: string[]): number {
   }
 
   return totalSignalStrength;
+}
+
+export function part2(inputs: string[]): string[][] {
+  const cpu = new ElfCPU(inputs);
+  const crt = [] as string[][];
+
+  let currentPixel = 0;
+  let currentLine = 0;
+  crt[0] = new Array<string>(40);
+  while (cpu.clockCycle <= 240) {
+    if ([cpu.X - 1, cpu.X, cpu.X + 1].includes(currentPixel)) {
+      crt[currentLine][currentPixel] = '#';
+    } else {
+      crt[currentLine][currentPixel] = '.';
+    }
+
+    if (currentPixel === 39) {
+      currentLine++;
+      crt[currentLine] = new Array<string>(40);
+    }
+    currentPixel = (currentPixel + 1) % 40;
+    cpu.tick();
+  }
+
+  return crt;
 }
