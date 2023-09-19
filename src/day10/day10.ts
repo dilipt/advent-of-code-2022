@@ -52,29 +52,44 @@ export function part1(inputs: string[]): number {
   return totalSignalStrength;
 }
 
-export function part2(inputs: string[]): string[][] {
-  const cpu = new ElfCPU(inputs);
-  const crt = [] as string[][];
+class ElfScreen {
+  crt: string[][];
+  width: number;
+  currentPixel: number;
+  currentLine: number;
 
-  for (let i = 0; i < 6; i++) {
-    crt[i] = new Array<string>(40);
+  constructor(width: number, height: number) {
+    this.crt = [];
+    for (let i = 0; i < height; i++) {
+      this.crt[i] = new Array<string>(width).fill('.');
+    }
+
+    this.currentLine = 0;
+    this.currentPixel = 0;
+    this.width = width;
   }
 
-  let currentPixel = 0;
-  let currentLine = 0;
-  while (cpu.clockCycle <= 240) {
-    if ([cpu.X - 1, cpu.X, cpu.X + 1].includes(currentPixel)) {
-      crt[currentLine][currentPixel] = '#';
-    } else {
-      crt[currentLine][currentPixel] = '.';
+  draw(X: number): void {
+    if ([X - 1, X, X + 1].includes(this.currentPixel)) {
+      this.crt[this.currentLine][this.currentPixel] = '#';
     }
 
-    if (currentPixel === crt[currentLine].length - 1) {
-      currentLine++;
+    this.currentPixel++;
+    if (this.currentPixel === this.width) {
+      this.currentLine++;
+      this.currentPixel = 0;
     }
-    currentPixel = (currentPixel + 1) % 40;
+  }
+}
+
+export function part2(inputs: string[]): string[][] {
+  const cpu = new ElfCPU(inputs);
+  const screen = new ElfScreen(40, 6);
+
+  while (cpu.clockCycle <= 240) {
+    screen.draw(cpu.X);
     cpu.tick();
   }
 
-  return crt;
+  return screen.crt;
 }

@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import assert from 'assert';
 
 class File {
   name: string;
@@ -39,11 +40,11 @@ function createFileStructure(input: string[]): Directory {
     if (currentLine.startsWith('$ cd')) {
       const cdDirName = currentLine.split(' ')[2];
       if (cdDirName === '..') {
-        if (currentDir.parent === null) throw Error(`directory ${currentDir.name} has no parent`);
+        assert(currentDir.parent !== null, `directory ${currentDir.name} has no parent`);
         currentDir = currentDir.parent;
       } else {
         const cdResult = currentDir.subdirs.find(dir => dir.name === cdDirName);
-        if (cdResult === undefined) throw Error(`directory not found: ${cdDirName}`);
+        assert(cdResult !== undefined, `directory not found: ${cdDirName}`);
         currentDir = cdResult;
       }
     } else {
